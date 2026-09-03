@@ -3,10 +3,10 @@
 	exports.id = 'timer';
 	exports.name = 'Timer';
 	exports.group = 'Triggers';
-	exports.version = '2';
+	exports.version = '3';
 	exports.icon = 'ti ti-clock';
-	exports.author = 'Total.js';
-	exports.config = { random: true, type: 'string', data: '', interval: 5000 };
+	exports.author = 'Peter Širka | Total.js';
+	exports.config = { random: true, type: 'string', data: '', prop: '', restart: false, interval: 5000 };
 	exports.outputs = [{ id: 'output', name: 'Output' }];
 	exports.kind = 'trigger';
 
@@ -47,6 +47,13 @@
 					break;
 			}
 
+
+			if (config.prop) {
+				let tmp = {};
+				Utils.set(tmp, config.prop, val);
+				val = tmp;
+			}
+
 			instance.send('output', val);
 		};
 
@@ -63,14 +70,9 @@
 		};
 
 		instance.configure();
+		config.restart && setTimeout(() => instance.trigger(), 5000);
 	};
 
-</script>
-
-<script>
-	FUNC.ftimer_exec = function(el) {
-		SETTER('websocket/send', { TYPE: 'trigger', id: el.attrd2('id') });
-	};
 </script>
 
 <style>
@@ -85,22 +87,27 @@
 
 <settings>
 	<div class="padding">
-		<div class="row">
-			<div class="col-md-3 m">
-				<ui-component name="input" path="?.interval" config="type:number;required:1;format:">Interval</ui-component>
-				<div class="help">In milliseconds</div>
-			</div>
-			<div class="col-md-9 m">
+		<div class="grid-2">
+			<div class="m">
 				<ui-component name="input" path="?.type" config="dirsource:string|String,number|Number,boolean|Boolean,date|Date,object|Object,buffer|Buffer as Base64;required:1">Type</ui-component>
+			</div>
+			<div class="grid-2">
+				<div class="m">
+					<ui-component name="input" path="?.interval" config="type:number;required:1;format:;ricon:!ms;monospace:1">Interval</ui-component>
+				</div>
+				<div class="m">
+					<ui-component name="input" path="?.prop" config="monospace:1;placeholder:property.path" class="m">Write to</ui-component>
+				</div>
 			</div>
 		</div>
 		<hr />
 		<div class="m">
+			<ui-component name="input" path="?.restart" config="type:checkbox">Trigger 5s after initialization</ui-component>
 			<ui-component name="input" path="?.random" config="type:checkbox">Random data</ui-component>
 		</div>
 		<ui-bind path="?.random" config="hide" class="hidden block">
 			<hr />
-			<ui-component name="input" path="?.data" config="required:1">Data</ui-component>
+			<ui-component name="input" path="?.data" config="required:1;height:250;type:multiline;maxlength:100000;monospace:1">Data</ui-component>
 		</ui-bind>
 	</div>
 </settings>
@@ -111,10 +118,10 @@ The component triggers data into the Flow in the specified interval.
 
 <body>
 	<header>
-		<i class="ICON"></i>NAME
+		<i class="$ICON"></i>$NAME
 	</header>
 	<div class="padding">
-		<button class="exec" data-exec="FUNC.ftimer_exec">Run</button>
-		<div class="help">Interval: <ui-bind path="CONFIG.interval" config="text;empty"></ui-bind> ms</div>
+		<button name="trigger">Run</button>
+		<div class="help">Interval: <ui-bind path="$CONFIG.interval" config="text;empty"></ui-bind> ms</div>
 	</div>
 </body>
